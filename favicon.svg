@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- a foldable phone half-open like a book: blue inner screen, dark body -->
+  <rect width="64" height="64" rx="14" fill="#0f1115"/>
+  <path d="M31 14 L13 10.5 Q10 10 10 13 V48 Q10 51 13 51.5 L31 55 Z" fill="#2a5bd7" stroke="#e8eaf0" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M33 14 L51 10.5 Q54 10 54 13 V48 Q54 51 51 51.5 L33 55 Z" fill="#4c8dff" stroke="#e8eaf0" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M15 15.5 L27 17.8 V22 L15 19.7 Z" fill="#e8eaf0" opacity=".35"/>
+  <circle cx="48" cy="16.5" r="1.8" fill="#0f1115"/>
+</svg>
