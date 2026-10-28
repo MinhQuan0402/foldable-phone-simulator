@@ -62,6 +62,8 @@ Every layout change plays a **3D animation of the whole phone**, the way the rea
 
 Your app is one live web view, and a browser can't bend one view across two hinged panels. So during the ~1 s movement the phone shows plain lit screens, then your live app fades back in at its new size, with its state intact. For Book and Laptop/Tabletop the phone folds into shape, holds briefly, then turns flat toward you so you can use the app. The **posture model** under the layout picker keeps showing the physical shape (inner screen blue, cover green).
 
+**Book, Laptop and Tabletop** show two phones side by side: a 3D phone held in that posture, and the flat phone you use. Click **Show my app in 3D** and choose **This tab** when Chrome asks to share: the 3D phone's screens then mirror your app live as you use it (Chrome or Edge on a computer; it uses tab capture cropped to the phone's screen, and nothing leaves your browser). Click **Stop** to end the mirror. Without it, the 3D phone shows the posture with plain screens.
+
 The fold line is hidden by default; turn it on with **View → Show fold line**. Turn animations off with **View → Animations & posture model**; they also switch off automatically when the OS asks for reduced motion.
 
 ## Testing your app

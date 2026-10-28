@@ -122,15 +122,36 @@ code{background:#0f1218;padding:1px 4px;border-radius:4px}
 }
 
 /* 3D transition rig: two hinged halves of the phone */
-#rig{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:20}
-#rig .r-cam,#rig .r-orient{position:absolute;left:0;top:0;transform-style:preserve-3d}
-#rig .r-half{position:absolute;transform-style:preserve-3d}
-#rig .r-half.a{transform-origin:left center 3px}
-#rig .r-half.b{transform-origin:right center 3px}
-#rig .r-face{position:absolute;inset:0;backface-visibility:hidden;transform:translateZ(3px);background:#1c1d21;
+.rig{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:20}
+.rig .r-cam,.rig .r-orient{position:absolute;left:0;top:0;transform-style:preserve-3d}
+.rig .r-half{position:absolute;transform-style:preserve-3d}
+.rig .r-half.a{transform-origin:left center 3px}
+.rig .r-half.b{transform-origin:right center 3px}
+.rig .r-face{position:absolute;inset:0;backface-visibility:hidden;transform:translateZ(3px);background:#1c1d21;
   box-shadow:inset 0 0 0 1.5px #5a5d66,0 20px 60px rgba(0,0,0,.45)}
-#rig .r-face.back{transform:rotateY(180deg) translateZ(3px);background:linear-gradient(160deg,#2b2e36,#15161a)}
-#rig .r-glass{position:absolute;overflow:hidden;
+.rig .r-face.back{transform:rotateY(180deg) translateZ(3px);background:linear-gradient(160deg,#2b2e36,#15161a)}
+.rig .r-glass{position:absolute;overflow:hidden;
   background:linear-gradient(155deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%),linear-gradient(180deg,#eef2f6,#dfe5ec)}
-#rig .r-glass.cover{background:linear-gradient(155deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%),linear-gradient(180deg,#eef2f6,#dfe5ec)}
-#rig .r-camdot{position:absolute;width:20px;height:20px;border-radius:50%;background:#000}
+.rig .r-glass.cover{background:linear-gradient(155deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%),linear-gradient(180deg,#eef2f6,#dfe5ec)}
+.rig .r-camdot{position:absolute;width:20px;height:20px;border-radius:50%;background:#000}
+
+/* side-by-side: 3D posture view + the flat phone you use */
+#stageWrap.dual{gap:48px}
+#poseView{display:flex;flex-direction:column;align-items:center;gap:10px}
+#poseView[hidden]{display:none}
+.pv-title{margin:0;color:var(--fg);font-size:12px;letter-spacing:.06em}
+#pvStage{position:relative;transform-origin:center center;flex:none}
+.pv-cta{text-align:center;max-width:320px}
+.pv-cta p{color:var(--mute);font-size:12px;margin:8px 0 0}
+.pv-msg{color:var(--warn)!important}
+.pv-live{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:12px}
+.pv-live[hidden]{display:none}
+.pv-live .dot{width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 3px rgba(255,93,93,.25)}
+.pv-live button{padding:3px 10px;font-size:12px}
+.rig .r-vwrap{position:absolute;overflow:hidden}
+.rig .r-vwrap video{position:absolute;object-fit:fill;opacity:0;transition:opacity .2s}
+.rig .r-vwrap video.on{opacity:1}
+/* tab capture only sends frames when the region repaints: keep a near-invisible pixel ticking while mirroring */
+#ticker{position:absolute;right:0;bottom:0;width:1px;height:1px;pointer-events:none;opacity:0;z-index:9}
+#screen.capturing #ticker{animation:tick 1s steps(30) infinite}
+@keyframes tick{from{opacity:.011}to{opacity:.019}}

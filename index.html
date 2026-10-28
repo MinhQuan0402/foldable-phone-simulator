@@ -108,7 +108,18 @@
 
 <main id="viewport">
   <div id="info"></div>
-  <div id="stageWrap"><div id="stage">
+  <div id="stageWrap">
+    <section id="poseView" hidden aria-label="3D posture view">
+      <h2 id="pvTitle" class="pv-title"></h2>
+      <div id="pvStage"></div>
+      <div id="pvCta" class="pv-cta">
+        <button id="liveBtn" class="primary">Show my app in 3D</button>
+        <p>Chrome asks to share this tab, so the 3D phone can mirror your app live.<br>Use the app on the flat phone →</p>
+        <p id="pvMsg" class="pv-msg" role="status"></p>
+      </div>
+      <div id="pvLive" class="pv-live" hidden><span class="dot"></span>Live mirror · use the app on the flat phone → <button id="liveStop">Stop</button></div>
+    </section>
+    <div id="stage">
     <div class="device" id="device">
       <div class="screen" id="screen">
         <iframe id="frameA" title="App A"></iframe>
@@ -120,6 +131,7 @@
         <div id="markers"></div>
         <div id="camera"></div>
         <div id="homeBar"></div>
+        <div id="ticker" aria-hidden="true"></div>
       </div>
     </div>
   </div></div>

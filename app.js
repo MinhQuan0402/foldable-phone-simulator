@@ -217,6 +217,7 @@
 
     stage.classList.toggle('tent', S.layoutId === 'tent' && animOn());
     updateModel();
+    updatePoseView();
 
     [...$('layouts').children].forEach(b => b.classList.toggle('on', b.dataset.v === S.layoutId));
     $('orientLabel').textContent = layoutDesc(S.layoutId);
@@ -237,9 +238,16 @@
 
   function fit() {
     const W = geo.w + 2 * BEZEL, H = geo.h + 2 * BEZEL, z = $('zoom').value;
-    const k = z === 'fit' ? Math.min((viewport.clientWidth - 40) / W, (viewport.clientHeight - 60) / H, 1) : +z;
+    const dual = !$('poseView').hidden;
+    // side by side with the 3D view: each phone gets half the width
+    const availW = dual ? (viewport.clientWidth - 40 - 48) / 2 : viewport.clientWidth - 40;
+    const k = z === 'fit' ? Math.min(availW / W, (viewport.clientHeight - (dual ? 110 : 60)) / H, 1) : +z;
     stage.style.transform = `scale(${k})`;
     stage.style.margin = `${(H * k - H) / 2}px ${(W * k - W) / 2}px`;
+    const pvs = $('pvStage');
+    if (dual) {
+      Object.assign(pvs.style, { width: W + 'px', height: H + 'px', transform: `scale(${k})`, margin: `${(H * k - H) / 2}px ${(W * k - W) / 2}px` });
+    }
   }
 
   function loadUrls(force) {
@@ -356,27 +364,99 @@
   const lerp = (p, q) => ({ z: (p.z + q.z) / 2, a: (p.a + q.a) / 2, b: (p.b + q.b) / 2, s: (p.s + q.s) / 2,
                              cam: 'rotateX(14deg) rotateY(-20deg) scale(.9)' });
 
-  function buildRig(d) {
+  function buildRig(d, parent = stage, video = false) {
     const dev = S.dev, inR = dev.inner.r, cr = Array.isArray(dev.cover.r) ? dev.cover.r : [dev.cover.r, dev.cover.r, dev.cover.r, dev.cover.r];
     const R = inR + BEZEL, cam = dev.cover.cam;
     const glassTop = (d.PH - d.sh) / 2, coverLeft = (d.PW - d.cw) / 2, coverTop = (d.PH - d.ch) / 2;
     const camDot = cam && !cam.udc ? `<i class="r-camdot" style="left:${(cam.cx != null ? cam.cx * d.cw : d.cw - cam.right - 10) - 10}px;top:${cam.top}px"></i>` : '';
+    const vid = video ? '<div class="r-vwrap"><video muted playsinline autoplay></video></div>' : '';
     const rig = document.createElement('div');
-    rig.id = 'rig';
+    rig.className = 'rig';
+    if (parent === stage) rig.id = 'rig';
     rig.innerHTML = `<div class="r-cam"><div class="r-orient">
       <div class="r-half a" style="width:${d.PW}px;height:${d.PH}px;left:0;top:${-d.PH / 2}px">
         <div class="r-face front" style="border-radius:4px ${R}px ${R}px 4px">
-          <div class="r-glass" style="left:0;top:${glassTop}px;width:${d.sw}px;height:${d.sh}px;border-radius:0 ${inR}px ${inR}px 0"></div></div>
+          <div class="r-glass" style="left:0;top:${glassTop}px;width:${d.sw}px;height:${d.sh}px;border-radius:0 ${inR}px ${inR}px 0">${vid}</div></div>
         <div class="r-face back" style="border-radius:${R}px 4px 4px ${R}px"></div>
       </div>
       <div class="r-half b" style="width:${d.PW}px;height:${d.PH}px;left:${-d.PW}px;top:${-d.PH / 2}px">
         <div class="r-face front" style="border-radius:${R}px 4px 4px ${R}px">
-          <div class="r-glass" style="right:0;top:${glassTop}px;width:${d.sw}px;height:${d.sh}px;border-radius:${inR}px 0 0 ${inR}px"></div></div>
+          <div class="r-glass" style="right:0;top:${glassTop}px;width:${d.sw}px;height:${d.sh}px;border-radius:${inR}px 0 0 ${inR}px">${vid}</div></div>
         <div class="r-face back" style="border-radius:4px ${R}px ${R}px 4px">
           <div class="r-glass cover" style="left:${coverLeft}px;top:${coverTop}px;width:${d.cw}px;height:${d.ch}px;border-radius:${cr.map(v => v + 'px').join(' ')}">${camDot}</div></div>
       </div></div></div>`;
-    stage.appendChild(rig);
+    parent.appendChild(rig);
     return rig;
+  }
+
+  /* ---------- 3D posture view (Book, Laptop, Tabletop) ----------
+   * A half-folded phone can't be shown with one live web view, so these postures show two phones:
+   * a 3D phone held in the real posture, and the flat phone you use. With Chrome/Edge tab capture
+   * (Region Capture), the 3D phone's screens mirror the live app in real time. */
+  let live = null, pvKey = '';
+  const pvShown = () => animOn() && L().screen === 'inner' && L().posture === 'half';
+
+  function placeVideos(rig, d) {
+    // each half shows its part of the flat screen; when the phone is turned, counter-rotate so content stays upright
+    const rot = L().rot, iw = d.sw * 2, ih = d.sh;
+    rig.querySelectorAll('.r-half').forEach(h => {
+      const isA = h.classList.contains('a'), w = h.querySelector('.r-vwrap'), v = w.querySelector('video');
+      if (!rot) {
+        Object.assign(w.style, { left: '0px', top: '0px', width: d.sw + 'px', height: d.sh + 'px', transform: 'none' });
+        Object.assign(v.style, { left: (isA ? -d.sw : 0) + 'px', top: '0px', width: iw + 'px', height: ih + 'px' });
+      } else {   // B is the top half, A the bottom half
+        Object.assign(w.style, { left: (d.sw - d.sh) / 2 + 'px', top: (d.sh - d.sw) / 2 + 'px', width: d.sh + 'px', height: d.sw + 'px', transform: 'rotate(-90deg)' });
+        Object.assign(v.style, { left: '0px', top: (isA ? -d.sw : 0) + 'px', width: ih + 'px', height: iw + 'px' });
+      }
+      if (live && v.srcObject !== live) {
+        v.srcObject = live; v.play().catch(() => {});
+        v.addEventListener('resize', () => v.classList.toggle('on', v.videoWidth > 0));   // show once frames arrive
+      }
+    });
+  }
+
+  function updatePoseView() {
+    const pv = $('poseView'), show = pvShown();
+    pv.hidden = !show;
+    $('stageWrap').classList.toggle('dual', show);
+    if (!show) { pvKey = ''; $('pvStage').innerHTML = ''; return; }
+    const d = rigDims(), key = [S.dev.id, S.layoutId, d.sw, d.sh, d.cw, d.ch].join();
+    if (key !== pvKey) {
+      pvKey = key;
+      const host = $('pvStage'); host.innerHTML = '';
+      const rig = buildRig(d, host, true), p = pose(S.layoutId, true, d);
+      rig.querySelector('.r-cam').style.transform = `perspective(2400px) ${p.cam} scale(.84)`;   // angled halves come forward, so leave room
+      rig.querySelector('.r-orient').style.transform = `rotateZ(${p.z}deg) translateX(${p.s}px)`;
+      rig.querySelector('.r-half.a').style.transform = `rotateY(${p.a}deg)`;
+      rig.querySelector('.r-half.b').style.transform = `rotateY(${p.b}deg)`;
+      placeVideos(rig, d);
+    }
+    $('pvTitle').textContent = `${layoutName(S.layoutId)} posture · 3D view`;
+    $('pvLive').hidden = !live; $('pvCta').hidden = !!live;
+  }
+
+  async function startLive() {
+    const msg = $('pvMsg'); msg.textContent = '';
+    if (!navigator.mediaDevices?.getDisplayMedia || !window.CropTarget) {
+      msg.textContent = 'Live 3D needs Chrome or Edge on a computer. The 3D phone still shows the posture.'; return;
+    }
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false, preferCurrentTab: true, selfBrowserSurface: 'include' });
+      const track = stream.getVideoTracks()[0];
+      await track.cropTo(await CropTarget.fromElement(screen));   // only the phone's screen, not the whole tab
+      track.addEventListener('ended', stopLive);
+      live = stream; pvKey = ''; screen.classList.add('capturing'); updatePoseView();
+    } catch (e) {
+      console.warn('Live 3D capture failed:', e);
+      stream?.getTracks().forEach(t => t.stop());
+      msg.textContent = e?.name === 'NotAllowedError' ? 'Sharing was cancelled. Click again and choose “This tab”.'
+                                                      : 'Choose “This tab” in Chrome’s sharing dialog so the 3D phone can mirror your app.';
+    }
+  }
+  function stopLive() {
+    live?.getTracks().forEach(t => t.stop());
+    live = null; pvKey = ''; screen.classList.remove('capturing'); updatePoseView();
   }
 
   let rigRun = null;
@@ -453,6 +533,8 @@
   ['cutout', 'creaseShow', 'segOutline', 'animate'].forEach(id => $(id).onchange = () => layout(false));
   ['sT', 'sR', 'sB', 'sL'].forEach(id => $(id).oninput = sendAll);
   $('zoom').onchange = fit;
+  $('liveBtn').onclick = startLive;
+  $('liveStop').onclick = stopLive;
   $('load').onclick = () => loadUrls(true);
   $('reload').onclick = () => [frameA, frameB].forEach(f => { if (f.getAttribute('src')) try { f.contentWindow.location.reload(); } catch { f.src = f.src; } });
   $('check').onclick = () => [frameA, frameB].forEach(f => { try { f.contentWindow.postMessage({ type: 'duo:check' }, '*'); } catch {} });
