@@ -2,7 +2,11 @@
 
 Browser-based simulator for book-style foldable phones: Apple iPhone Duo, Samsung Galaxy Z Fold5/6/7/8/8 Ultra and Google Pixel Fold / 9 Pro Fold / 10 Pro Fold / 11 Pro Fold. Each has a small **cover screen** when folded and one large **inner screen** when opened. Load your mobile web app / WebView content in it to see how the UI behaves on both screens.
 
-## Run
+## Open it
+**Hosted:** https://minhquan0402.github.io/foldable-phone-simulator/ (no install needed).
+Paste your app's URL, e.g. `http://localhost:3000`, and press Load. The first time, Chrome may ask to allow access to devices on your local network: click Allow.
+
+**Run locally instead:**
 ```bash
 cd foldable-phone-simulator
 python3 -m http.server 8080      # or: npx serve .
@@ -65,7 +69,8 @@ The fold line is hidden by default; turn it on with **View → Show fold line**.
    It must allow framing (no `X-Frame-Options: DENY` / `frame-ancestors 'none'`) and, if the simulator is on http, be http too.
 2. For live layout checks, add the bridge to your app (dev only):
    ```html
-   <script src="http://localhost:8080/duo-bridge.js"></script>
+   <script src="https://minhquan0402.github.io/foldable-phone-simulator/duo-bridge.js"></script>
+   <!-- or http://localhost:8080/duo-bridge.js when running locally -->
    ```
    It reports and highlights: controls on the fold crease, content split by the fold when half-folded, horizontal overflow, clipped elements, tap targets < 44pt, text lines too long for the inner screen, and an inner screen that is mostly unused (phone layout).
 3. Adapt your layout. Prefer width-based breakpoints (split-view panes are narrow even on the inner screen), plus the bridge's hooks for fold-aware tweaks:
