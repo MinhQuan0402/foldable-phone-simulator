@@ -66,6 +66,9 @@ Your app is one live web view, and a browser can't bend one view across two hing
 
 The fold line is hidden by default; turn it on with **View → Show fold line**. Turn animations off with **View → Animations & posture model**; they also switch off automatically when the OS asks for reduced motion.
 
+## Recent links
+Every URL you load (Load button or Enter) is saved under **Recent links**, newest first, up to 20. Click one to reopen it, × to remove it, or **Clear all**. The URL boxes also suggest past links as you type, and the simulator reopens your most recent link when you come back. History is stored only in this browser (localStorage): it isn't uploaded and doesn't sync between browsers or computers.
+
 ## Testing your app
 1. Start your app's dev server, paste its URL, press Load.
    It must allow framing (no `X-Frame-Options: DENY` / `frame-ancestors 'none'`) and, if the simulator is on http, be http too.

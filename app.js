@@ -250,13 +250,54 @@
     }
   }
 
-  function loadUrls(force) {
+  function loadUrls(force, remember = false) {
     const a = $('urlA').value.trim() || 'about:blank';
     const b = $('urlB').value.trim() || a;
     if (force || loaded.A !== a) { frameA.src = a; loaded.A = a; }
     if (isSplit() && (force || loaded.B !== b)) { frameB.src = b; loaded.B = b; }
+    if (remember) { remember_(a); if (isSplit() && b !== a) remember_(b); }
     reports.clear(); renderReport();
   }
+
+  /* ---------- recent links (saved in this browser only) ---------- */
+  const HKEY = 'foldsim.history.v1', HMAX = 20;
+  function readHistory() {
+    try { const h = JSON.parse(localStorage.getItem(HKEY) || '[]'); return Array.isArray(h) ? h.filter(x => x && typeof x.url === 'string') : []; }
+    catch { return []; }
+  }
+  function writeHistory(h) { try { localStorage.setItem(HKEY, JSON.stringify(h.slice(0, HMAX))); } catch {} renderHistory(); }
+  function remember_(url) {
+    if (!url || url === 'about:blank') return;
+    const h = readHistory(), old = h.find(x => x.url === url);
+    writeHistory([{ url, last: Date.now(), count: (old?.count || 0) + 1 }, ...h.filter(x => x.url !== url)]);
+  }
+  function ago(t) {
+    const s = Math.max(0, (Date.now() - t) / 1000);
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + ' min ago';
+    if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+    if (s < 86400 * 7) return Math.floor(s / 86400) + ' d ago';
+    return new Date(t).toLocaleDateString();
+  }
+  function shortUrl(u) {
+    try { const x = new URL(u, location.href); return x.origin === location.origin ? x.pathname.split('/').pop() + x.search : x.host + (x.pathname === '/' ? '' : x.pathname) + x.search; }
+    catch { return u; }
+  }
+  function renderHistory() {
+    const h = readHistory(), ul = $('histList');
+    $('histEmpty').hidden = h.length > 0; $('histClear').hidden = h.length === 0;
+    ul.innerHTML = h.map((x, i) => `<li><button type="button" class="hist-open" data-i="${i}" title="Open ${esc(x.url)}">
+        <span class="hist-url">${esc(shortUrl(x.url))}</span><small>${esc(ago(x.last))}${x.count > 1 ? ` · opened ${x.count}×` : ''}</small></button>
+        <button type="button" class="hist-del" data-i="${i}" aria-label="Remove ${esc(x.url)} from recent links" title="Remove">×</button></li>`).join('');
+    $('urlHistory').innerHTML = h.map(x => `<option value="${esc(x.url)}"></option>`).join('');
+  }
+  $('histList').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const h = readHistory(), item = h[+b.dataset.i]; if (!item) return;
+    if (b.classList.contains('hist-del')) return writeHistory(h.filter((_, i) => i !== +b.dataset.i));
+    $('urlA').value = item.url; loadUrls(true, true);
+  };
+  $('histClear').onclick = () => writeHistory([]);
 
   /* ---------- bridge protocol ---------- */
   function configFor(key) {
@@ -535,14 +576,17 @@
   $('zoom').onchange = fit;
   $('liveBtn').onclick = startLive;
   $('liveStop').onclick = stopLive;
-  $('load').onclick = () => loadUrls(true);
+  $('load').onclick = () => loadUrls(true, true);
   $('reload').onclick = () => [frameA, frameB].forEach(f => { if (f.getAttribute('src')) try { f.contentWindow.location.reload(); } catch { f.src = f.src; } });
   $('check').onclick = () => [frameA, frameB].forEach(f => { try { f.contentWindow.postMessage({ type: 'duo:check' }, '*'); } catch {} });
-  ['urlA', 'urlB'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') loadUrls(true); }));
+  ['urlA', 'urlB'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') loadUrls(true, true); }));
   window.addEventListener('resize', fit);
 
   selectDevice(DEVICES[0].id);
   setSafe(defaultSafe());
   layout(false);
+  const recent = readHistory()[0];
+  if (recent) $('urlA').value = recent.url;   // pick up where you left off
+  renderHistory();
   loadUrls(true);
 })();

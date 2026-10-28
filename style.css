@@ -155,3 +155,18 @@ code{background:#0f1218;padding:1px 4px;border-radius:4px}
 #ticker{position:absolute;right:0;bottom:0;width:1px;height:1px;pointer-events:none;opacity:0;z-index:9}
 #screen.capturing #ticker{animation:tick 1s steps(30) infinite}
 @keyframes tick{from{opacity:.011}to{opacity:.019}}
+
+/* recent links */
+.history{margin-top:12px}
+.hist-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.hist-head h3{margin:0;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.text-btn{background:none;border:0;padding:2px 4px;color:var(--acc);font-size:12px}
+.text-btn:hover{text-decoration:underline}
+#histList{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:220px;overflow:auto}
+#histList li{display:flex;gap:4px}
+.hist-open{flex:1;min-width:0;text-align:left;display:flex;flex-direction:column;gap:1px;padding:6px 8px}
+.hist-url{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg)}
+.hist-open small{color:var(--mute);font-size:11px}
+.hist-del{flex:none;width:30px;padding:0;color:var(--mute);font-size:16px;line-height:1}
+.hist-del:hover{color:var(--bad);border-color:var(--bad)}
+#histList button:focus-visible,.text-btn:focus-visible{outline:2px solid var(--acc);outline-offset:1px}

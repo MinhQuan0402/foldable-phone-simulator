@@ -20,14 +20,23 @@
   <section>
     <h2>App under test</h2>
     <label>URL
-      <input id="urlA" type="url" placeholder="http://localhost:3000" value="demo.html">
+      <input id="urlA" type="url" placeholder="http://localhost:3000" value="demo.html" list="urlHistory" autocomplete="off">
     </label>
     <label>Second app URL (split view)
-      <input id="urlB" type="url" placeholder="same as above if empty" value="demo.html?pane=b">
+      <input id="urlB" type="url" placeholder="same as above if empty" value="demo.html?pane=b" list="urlHistory" autocomplete="off">
     </label>
     <div class="row">
       <button id="load" class="primary">Load</button>
       <button id="reload">Reload</button>
+    </div>
+    <datalist id="urlHistory"></datalist>
+    <div class="history">
+      <div class="hist-head">
+        <h3>Recent links</h3>
+        <button id="histClear" class="text-btn" type="button" hidden>Clear all</button>
+      </div>
+      <ul id="histList"></ul>
+      <p id="histEmpty" class="hint">Links you load appear here, so you can reopen them in one click. They're saved only in this browser.</p>
     </div>
   </section>
 
