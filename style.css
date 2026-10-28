@@ -1,0 +1,136 @@
+:root{--bg:#0f1115;--panel:#171a21;--line:#2a2f3a;--fg:#e8eaf0;--mute:#8b93a5;--acc:#4c8dff;--bad:#ff5d5d;--ok:#3ecf8e;--warn:#f5b14c;--anim:.55s cubic-bezier(.4,0,.2,1)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{display:flex}
+#panel{width:300px;flex:none;background:var(--panel);border-right:1px solid var(--line);overflow:auto;padding:14px}
+h1{font-size:16px;margin:0 0 12px}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:0 0 8px}
+section{padding:12px 0;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+label{display:block;color:var(--mute);font-size:12px;margin-bottom:8px}
+label.check{display:flex;gap:8px;align-items:center;color:var(--fg)}
+input,select,button{font:inherit;color:var(--fg);background:#0f1218;border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+label>input:not([type=checkbox]),label>select{display:block;width:100%;margin-top:3px}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.seg button{padding:8px 4px;text-align:center;line-height:1.2}
+.seg button small{color:var(--mute);font-size:10px}
+.seg button.on{border-color:var(--acc);background:#16264a}
+.hint{color:var(--mute);font-size:11px;margin:4px 0 8px}
+code{background:#0f1218;padding:1px 4px;border-radius:4px}
+.ref{width:100%;border-radius:8px;display:block;margin-bottom:8px;background:#fff}
+.badge{display:inline-block;margin:8px 0;padding:2px 8px;border-radius:99px;font-size:11px}
+.badge.off{background:#2a2f3a;color:var(--mute)}
+.badge.on{background:#12382a;color:var(--ok)}
+#report{list-style:none;padding:0;margin:0}
+#report li{padding:6px 8px;margin-bottom:6px;border-radius:6px;background:#0f1218;border-left:3px solid var(--warn);font-size:12px;word-break:break-word}
+#report li.bad{border-color:var(--bad)}
+#report li.ok{border-color:var(--ok)}
+#report li small{display:block;color:var(--mute)}
+
+#viewport{flex:1;position:relative;overflow:auto;min-width:0}
+#info{position:absolute;top:10px;left:14px;color:var(--mute);font-size:12px;z-index:5;pointer-events:none}
+#stageWrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:40px 20px 20px}
+#stage{position:relative;transform-origin:center center;flex:none;transition:transform var(--anim),margin var(--anim)}
+
+/* device: thin uniform bezel like the reference photo */
+.device{position:relative;background:#1c1d21;padding:9px;border-radius:44px;
+  box-shadow:inset 0 0 0 1.5px #5a5d66,0 0 0 1px #0a0a0c,0 30px 80px rgba(0,0,0,.6);transition:border-radius var(--anim)}
+.device.inner{border-radius:34px}
+.screen{position:relative;overflow:hidden;background:#000;border-radius:36px;
+  transition:width var(--anim),height var(--anim),border-radius var(--anim)}
+.device.inner .screen{border-radius:26px}
+.screen iframe{position:absolute;top:0;left:0;border:0;background:#fff;
+  transition:width var(--anim),height var(--anim),left var(--anim),top var(--anim)}
+#frameB{display:none}
+.split #frameB{display:block}
+#divider{position:absolute;display:none;background:#000;z-index:2}
+.split #divider{display:block}
+.split #divider::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:40px;margin:-20px 0 0 -2px;border-radius:2px;background:#555}
+.split.h #divider::after{width:40px;height:4px;margin:-2px 0 0 -20px}
+
+/* the crease: does not hide content (seamless), just a subtle fold shading */
+#creaseLine{position:absolute;pointer-events:none;z-index:3;display:none}
+.inner #creaseLine.show{display:block}
+#creaseLine.v{background:linear-gradient(90deg,transparent,rgba(0,0,0,.10) 40%,rgba(255,255,255,.08) 50%,rgba(0,0,0,.10) 60%,transparent)}
+#creaseLine.h{background:linear-gradient(180deg,transparent,rgba(0,0,0,.10) 40%,rgba(255,255,255,.08) 50%,rgba(0,0,0,.10) 60%,transparent)}
+
+/* half-folded posture: tilt the device a little to suggest the fold */
+
+/* punch-hole camera (cover screen, top-right per reference) */
+#camera{position:absolute;width:20px;height:20px;border-radius:50%;background:#000;box-shadow:0 0 0 2px #111 inset,0 0 0 1px #222;z-index:4;pointer-events:none;
+  transition:top var(--anim),left var(--anim)}
+#camera.hide{display:none}
+
+.seg-outline{position:absolute;border:2px dashed var(--acc);pointer-events:none;z-index:5;display:none}
+.outline .seg-outline{display:block}
+#markers{position:absolute;inset:0;pointer-events:none;z-index:7}
+.marker{position:absolute;border:2px solid var(--bad);background:rgba(255,93,93,.18)}
+.marker.warn{border-color:var(--warn);background:rgba(245,177,76,.2)}
+.resizing .marker{display:none}
+
+/* layout picker (icons from Apple's supported-layouts artwork) */
+.layouts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+.layouts button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;font-size:11px;line-height:1.15}
+.layouts img{height:30px;max-width:100%;object-fit:contain;opacity:.75}
+.layouts button.on{border-color:var(--acc);background:#16264a}
+.layouts button.on img{opacity:1}
+
+/* home indicator */
+#homeBar{position:absolute;left:50%;bottom:8px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:rgba(0,0,0,.75);z-index:4;pointer-events:none;
+  transition:bottom var(--anim)}
+.device.inner #homeBar{width:180px;margin-left:-90px}
+.layouts img.rot{transform:rotate(90deg)}
+/* under-display camera: barely visible */
+#camera.udc{background:rgba(0,0,0,.12);box-shadow:none}
+/* Android gesture handle is a little shorter */
+#homeBar.android{width:108px;margin-left:-54px;height:4px}
+.device.inner #homeBar.android{width:140px;margin-left:-70px}
+
+/* ---------- animations ---------- */
+/* tent: the cover screen leans back like the face of an A-frame */
+#stage.tent .device{transform:perspective(1600px) rotateX(14deg);transition:transform var(--anim)}
+.device{transition:border-radius var(--anim),transform var(--anim)}
+
+/* 3D posture model */
+#model{position:relative;width:100%;height:150px;margin:2px 0 8px;pointer-events:none;perspective:700px;border-radius:8px;background:radial-gradient(ellipse at 50% 60%,#232733,transparent 70%);
+  --pw:44px;--ph:64px;--t:.8s cubic-bezier(.4,0,.2,1)}
+#model.hide{display:none}
+.m-cam{position:absolute;left:50%;top:46%;transform-style:preserve-3d;transition:transform var(--t)}
+.m-rot{transform-style:preserve-3d;transition:transform var(--t)}
+.m-half{position:absolute;top:calc(var(--ph) / -2);width:var(--pw);height:var(--ph);transform-style:preserve-3d;transition:transform var(--t)}
+.m-half.a{left:0;transform-origin:left center}
+.m-half.b{left:calc(var(--pw) * -1);transform-origin:right center}
+.face{position:absolute;inset:0;border-radius:7px;backface-visibility:hidden;border:2px solid #0b0c0f}
+.face.front{background:linear-gradient(160deg,#6aa2ff,#2a5bd7)}
+.face.back{background:linear-gradient(160deg,#3a3d46,#22242a);transform:rotateY(180deg)}
+.a .face.front,.b .face.back{border-radius:0 7px 7px 0}
+.a .face.back,.b .face.front{border-radius:7px 0 0 7px}
+.face.back.cover{background:linear-gradient(160deg,#5be0a4,#1f8f5f)}
+.m-label{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:11px;color:var(--mute)}
+.m-label b{color:var(--fg);font-weight:600}
+.m-label i{font-style:normal;display:inline-block;width:8px;height:8px;border-radius:2px;margin:0 3px 0 8px;vertical-align:0}
+
+@media (prefers-reduced-motion: reduce){
+  #rig{display:none}
+  .m-cam,.m-rot,.m-half,.screen,.screen iframe,#stage{transition:none!important}
+}
+
+/* 3D transition rig: two hinged halves of the phone */
+#rig{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:20}
+#rig .r-cam,#rig .r-orient{position:absolute;left:0;top:0;transform-style:preserve-3d}
+#rig .r-half{position:absolute;transform-style:preserve-3d}
+#rig .r-half.a{transform-origin:left center 3px}
+#rig .r-half.b{transform-origin:right center 3px}
+#rig .r-face{position:absolute;inset:0;backface-visibility:hidden;transform:translateZ(3px);background:#1c1d21;
+  box-shadow:inset 0 0 0 1.5px #5a5d66,0 20px 60px rgba(0,0,0,.45)}
+#rig .r-face.back{transform:rotateY(180deg) translateZ(3px);background:linear-gradient(160deg,#2b2e36,#15161a)}
+#rig .r-glass{position:absolute;overflow:hidden;
+  background:linear-gradient(155deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%),linear-gradient(180deg,#eef2f6,#dfe5ec)}
+#rig .r-glass.cover{background:linear-gradient(155deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%),linear-gradient(180deg,#eef2f6,#dfe5ec)}
+#rig .r-camdot{position:absolute;width:20px;height:20px;border-radius:50%;background:#000}
